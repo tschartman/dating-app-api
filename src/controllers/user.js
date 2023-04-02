@@ -77,21 +77,30 @@ exports.register = async (req, res) => {
     return res.status(400).json({ message: 'Please provide an email or phone number' });
   }
 
-  try {
-    const newUser = await prisma.user.create({
-      data: {
-        email,
-        phone,
-      },
-    });
 
+  const user = await getUserByEmailOrPhone(email, phone);
 
+  if (!user) {
+    try {
+      const newUser = await prisma.user.create({
+        data: {
+          email,
+          phone,
+        },
+      });
+  
+  
+      await sendVerificationToken(newUser.id, email, phone);
+  
+      res.status(201).json({ message: 'User registered successfully'});
+  
+    } catch (error) {
+      res.status(500).json({ message: 'Error registering user', error });
+    }
+  } else {
     await sendVerificationToken(newUser.id, email, phone);
-
-    res.status(201).json({ message: 'User registered successfully', user: newUser });
-
-  } catch (error) {
-    res.status(500).json({ message: 'Error registering user', error });
+  
+    res.status(201).json({ message: 'User Already Exists'});
   }
 };
 
