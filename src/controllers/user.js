@@ -98,7 +98,7 @@ exports.register = async (req, res) => {
       res.status(500).json({ message: 'Error registering user', error });
     }
   } else {
-    await sendVerificationToken(newUser.id, email, phone);
+    await sendVerificationToken(user.id, email, phone);
   
     res.status(201).json({ message: 'User Already Exists'});
   }
