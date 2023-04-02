@@ -1,1 +1,3 @@
-release: npx db push
+web: npm start
+
+release: npx prisma db push
