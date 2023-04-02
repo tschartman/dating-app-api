@@ -69,7 +69,6 @@ async function verifyPasswordlessToken(email, phone, verificationToken) {
   return user;
 }
 
-
 exports.register = async (req, res) => {
   const { email, phone } = req.body;
 
@@ -77,18 +76,12 @@ exports.register = async (req, res) => {
     return res.status(400).json({ message: 'Please provide an email or phone number' });
   }
 
-  try {
-    const newUser = await prisma.user.create({
-      data: {
-        email,
-        phone,
-      },
-    });
+  const user = await getUserByEmailOrPhone(email, phone);
 
-    res.status(201).json({ message: 'User registered successfully', user: newUser });
-  } catch (error) {
-    res.status(500).json({ message: 'Error registering user', error });
+  if (user) {
+    return res.status(409).json({ error: 'User already created' });
   }
+
 };
 
 
@@ -110,6 +103,36 @@ exports.login = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+exports.verifyTokenRegister = async (req, res) => {
+  const { email, phone, verificationToken } = req.body;
+
+  try {
+    const user = await verifyPasswordlessToken(email, phone, verificationToken);
+
+    try {
+      const newUser = await prisma.user.create({
+        data: {
+          email,
+          phone,
+        },
+      });
+  
+      res.status(201).json({ message: 'User registered successfully', user: newUser });
+    } catch (error) {
+      res.status(500).json({ message: 'Error registering user', error });
+    }
+
+    // Generate a JWT token
+    const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    // Return the token to the client
+    res.status(200).json({ token });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
 
 exports.verifyToken = async (req, res) => {
   const { email, phone, verificationToken } = req.body;
