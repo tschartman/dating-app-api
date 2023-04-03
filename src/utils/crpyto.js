@@ -1,6 +1,6 @@
 const crypto = require('crypto')
 
-exports.generateNumericToken = (length) => {
+function generateNumericToken(length) {
   let token = '';
   const maxRandomValue = 10; // 10 possible digits (0-9)
 
@@ -17,3 +17,5 @@ exports.generateNumericToken = (length) => {
 
   return token;
 }
+
+module.exports = generateNumericToken
