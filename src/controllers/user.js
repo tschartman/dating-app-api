@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto')
 const sendEmail = require('../utils/email');
 const twilio = require('twilio');
+const generateNumericToken = require('../utils/crpyto')
 
 const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
@@ -17,7 +18,7 @@ async function getUserByEmailOrPhone(email, phone) {
 }
 
 async function sendVerificationToken(userId, email, phone) {
-  const verificationToken = crypto.randomBytes(4).toString('hex');
+  const verificationToken = generateNumericToken(6)
   const expiration = new Date();
   expiration.setMinutes(expiration.getMinutes() + 10); // Set the token to expire in 10 minutes
 
